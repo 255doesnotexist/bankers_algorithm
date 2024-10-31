@@ -1,0 +1,77 @@
+direction: down
+
+开始: 开始
+
+初始化: {
+  shape: rectangle
+  label: 初始化系统状态\n(Available、Max、Allocation、Need)
+}
+
+获取请求: {
+  shape: rectangle
+  label: 获取进程资源请求
+}
+
+检查需求: {
+  shape: diamond
+  label: 请求是否小于等于Need?
+}
+
+检查可用: {
+  shape: diamond
+  label: 请求是否小于等于Available?
+}
+
+试分配: {
+  shape: rectangle
+  label: 尝试分配资源
+}
+
+安全检查: {
+  shape: diamond
+  label: 系统是否安全?
+}
+
+回滚: {
+  shape: rectangle
+  label: 回滚资源分配
+}
+
+确认分配: {
+  shape: rectangle
+  label: 确认资源分配
+}
+
+更新状态: {
+  shape: rectangle
+  label: 更新系统状态
+}
+
+拒绝超额: {
+  shape: rectangle
+  label: 拒绝：超出最大需求
+}
+
+拒绝资源: {
+  shape: rectangle
+  label: 拒绝：资源不足
+}
+
+拒绝不安全: {
+  shape: rectangle
+  label: 拒绝：系统不安全
+}
+
+开始 -> 初始化
+初始化 -> 获取请求
+获取请求 -> 检查需求
+检查需求 -> 检查可用: 是
+检查需求 -> 拒绝超额: 否
+检查可用 -> 试分配: 是
+检查可用 -> 拒绝资源: 否
+试分配 -> 安全检查
+安全检查 -> 确认分配: 是
+安全检查 -> 回滚: 否
+回滚 -> 拒绝不安全
+确认分配 -> 更新状态
+更新状态 -> 获取请求
