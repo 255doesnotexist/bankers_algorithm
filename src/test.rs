@@ -5,11 +5,11 @@ mod tests {
 
     #[test]
     fn test_basic_safe_state() {
-        let available = vec![3, 3, 2];
+        let available: Vec<i32> = vec![3, 3, 2];
         let max = Matrix::from_vec(vec![
-            vec![7, 5, 3],
+            vec![5, 4, 2],
             vec![3, 2, 2],
-            vec![9, 0, 2],
+            vec![8, 0, 2],
         ]);
         let allocation = Matrix::from_vec(vec![
             vec![0, 1, 0],
@@ -17,14 +17,15 @@ mod tests {
             vec![3, 0, 2],
         ]);
 
-        let banker = BankersAlgorithm::new(available, max, allocation);
-        let (is_safe, _) = banker.is_safe();
+        let banker = BankersAlgorithm::new(available.clone(), max.clone(), allocation.clone());
+        let (is_safe, safe_sequence) = banker.is_safe();
         assert!(is_safe);
+        assert_eq!(safe_sequence, vec![1, 0, 2]); // 确保有一个安全序列
     }
 
     #[test]
     fn test_unsafe_state() {
-        let available = vec![1, 1, 1];
+        let available = vec![0, 1, 1];
         let max = Matrix::from_vec(vec![
             vec![7, 5, 3],
             vec![3, 2, 2],
@@ -34,7 +35,7 @@ mod tests {
             vec![2, 1, 1],
         ]);
 
-        let banker = BankersAlgorithm::new(available, max, allocation);
+        let banker = BankersAlgorithm::new(available.clone(), max.clone(), allocation.clone());
         let (is_safe, _) = banker.is_safe();
         assert!(!is_safe);
     }
@@ -47,13 +48,17 @@ mod tests {
             vec![3, 2, 2],
         ]);
         let allocation = Matrix::from_vec(vec![
-            vec![0, 1, 0],
+            vec![5, 2, 2],
             vec![2, 0, 0],
         ]);
 
-        let mut banker = BankersAlgorithm::new(available, max, allocation);
+        let mut banker = BankersAlgorithm::new(available.clone(), max.clone(), allocation.clone());
         let request = vec![1, 0, 1];
-        assert!(banker.request_resources(0, &request));
+        assert!(banker.request_resources(0, &request)); // 确保请求成功
+
+        // 重新检查安全性
+        let (is_safe, _) = banker.is_safe();
+        assert!(is_safe); // 确保仍然是安全状态
     }
 
     #[test]
@@ -68,8 +73,8 @@ mod tests {
             vec![2, 0, 0],
         ]);
 
-        let mut banker = BankersAlgorithm::new(available, max, allocation);
-        let request = vec![8, 0, 0];  // 超过最大需求
-        assert!(!banker.request_resources(0, &request));
+        let mut banker = BankersAlgorithm::new(available.clone(), max.clone(), allocation.clone());
+        let request = vec![8, 0, 0]; // 超过最大需求
+        assert!(!banker.request_resources(0, &request)); // 确保请求失败
     }
 }
