@@ -58,8 +58,13 @@ impl BankersAlgorithm {
                     finish[i] = true;
                     safe_sequence.push(i);
                     found = true;
-                    println!("{} Process {} added to safe sequence. Work: {:?}, Finish: {:?}", "→".green(), i, work, finish);
+                    println!("{} Process {} added to safe sequence. Finish: {:?}", "→".green(), i, finish);
+                    println!("Its previous Allocation: {:?}, Need: {:?}, are released.", self.allocation.data[i], self.need.data[i]);
+                    println!("Now Work vector: {:?}", work);
                     break; // 找到一个安全进程后，移动到下一次迭代
+                } else if !finish[i] {
+                    println!("{} Process {} cannot be allocated. Work: {:?}, Finish: {:?}", "→".red(), i, work, finish);
+                    println!("Because its Need: {:?} but Available now only have: {:?}", self.need.data[i], work);
                 }
             }
             if !found {
