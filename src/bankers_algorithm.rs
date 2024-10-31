@@ -47,7 +47,7 @@ impl BankersAlgorithm {
         let mut safe_sequence = Vec::new();
 
         for _ in 0..self.num_processes { // 迭代最多进程数量次
-            println!("{} Iteration start. Work: {:?}, Finish: {:?}", "→".blue(), work, finish);
+            println!("{} 迭代开始。Work: {:?}, Finish: {:?}", "→".blue(), work, finish);
             let mut found = false;
             for i in 0..self.num_processes {
                 if !finish[i] && self.can_allocate(&work, i) {
@@ -58,24 +58,23 @@ impl BankersAlgorithm {
                     finish[i] = true;
                     safe_sequence.push(i);
                     found = true;
-                    println!("{} Process {} added to safe sequence. Finish: {:?}", "→".green(), i, finish);
-                    println!("Its previous Allocation: {:?}, Need: {:?}, are released.", self.allocation.data[i], self.need.data[i]);
-                    println!("Now Work vector: {:?}", work);
+                    println!("{} 进程 {} 被加入安全序列。Finish: {:?}", "→".green(), i, finish);
+                    println!("其之前的 Allocation: {:?}, Need: {:?}, 被释放。", self.allocation.data[i], self.need.data[i]);
+                    println!("现在的 Work 向量: {:?}", work);
                     break; // 找到一个安全进程后，移动到下一次迭代
                 } else if !finish[i] {
-                    println!("{} Process {} cannot be allocated. Work: {:?}, Finish: {:?}", "→".red(), i, work, finish);
-                    println!("Because its Need: {:?} but Available now only have: {:?}", self.need.data[i], work);
+                    println!("{} 进程 {} 无法分配。Work: {:?}, Finish: {:?}", "→".red(), i, work, finish);
+                    println!("因为其 Need: {:?} 但当前可用资源只有: {:?}", self.need.data[i], work);
                 }
             }
             if !found {
-                println!("{} No safe process found in this iteration.", "→".red());
+                println!("{} 本次迭代中未找到安全进程。", "→".red());
                 break; // 在此迭代中未找到安全进程，退出循环
             }
         }
 
         (finish.iter().all(|&x| x), safe_sequence)
     }
-
 
     fn can_allocate(&self, work: &Vec<i32>, process: usize) -> bool {
         (0..self.num_resources).all(|j| self.need.data[process][j] <= work[j])
@@ -135,13 +134,13 @@ impl BankersAlgorithm {
     }
 
     pub fn print_state(&self) {
-        println!("\n{}", "Current System State:".yellow());
-        println!("Available: {:?}", self.available);
-        println!("\nMaximum:");
+        println!("\n{}", "当前系统状态:".yellow());
+        println!("Available 向量: {:?}", self.available);
+        println!("\nMaximum 矩阵:");
         print!("{}", self.max);
-        println!("\nAllocation:");
+        println!("\nAllocation 矩阵:");
         print!("{}", self.allocation);
-        println!("\nNeed:");
+        println!("\nNeed 矩阵:");
         print!("{}", self.need);
         println!();
     }

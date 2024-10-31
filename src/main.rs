@@ -28,22 +28,22 @@ fn main() {
 
     let mut banker = BankersAlgorithm::new(available, max, allocation);
     
-    println!("Initial State:");
+    println!("初始状态:");
     banker.print_state();
     
-    println!("\nRunning safety check...");
+    println!("\n运行安全性检查...");
     let (is_safe, sequence) = banker.is_safe();
     if is_safe {
-        println!("{} System is in safe state", "SUCCESS:".green());
-        println!("Safe sequence: {:?}", sequence);
+        println!("{} 系统处于安全状态", "SUCCESS:".green());
+        println!("安全序列: {:?}", sequence);
     } else {
-        println!("{} System is in unsafe state", "ERROR:".red());
+        println!("{} 系统处于不安全状态", "ERROR:".red());
     }
 
     // 处理资源请求
     let process = 1;
     let request = vec![1, 0, 2];
-    println!("\nProcess {} requests resources: {:?}", process, request);
+    println!("\n进程 {} 请求资源: {:?}", process, request);
     banker.request_resources(process, &request);
     
     banker.print_state();
