@@ -46,32 +46,29 @@ impl BankersAlgorithm {
         let mut finish = vec![false; self.num_processes];
         let mut safe_sequence = Vec::new();
 
-        // 安全性检查的主循环
-        loop {
+        for _ in 0..self.num_processes { // 迭代最多进程数量次
+            println!("{} Iteration start. Work: {:?}, Finish: {:?}", "→".blue(), work, finish);
             let mut found = false;
-            // 查找一个可以满足的进程
             for i in 0..self.num_processes {
                 if !finish[i] && self.can_allocate(&work, i) {
-                    // 模拟分配过程
+                    // 在检查后模拟完成和资源释放
                     for j in 0..self.num_resources {
                         work[j] += self.allocation.data[i][j];
                     }
                     finish[i] = true;
                     safe_sequence.push(i);
                     found = true;
-                    
-                    println!("{}进程 {} 已分配。工作向量: {:?}",
-                        "→ ".green(), i, work);
+                    println!("{} Process {} added to safe sequence. Work: {:?}, Finish: {:?}", "→".green(), i, work, finish);
+                    break; // 找到一个安全进程后，移动到下一次迭代
                 }
             }
-            
             if !found {
-                break;
+                println!("{} No safe process found in this iteration.", "→".red());
+                break; // 在此迭代中未找到安全进程，退出循环
             }
         }
 
-        let is_safe = finish.iter().all(|&x| x);
-        (is_safe, safe_sequence)
+        (finish.iter().all(|&x| x), safe_sequence)
     }
 
 
@@ -80,32 +77,30 @@ impl BankersAlgorithm {
     }
 
     pub fn request_resources(&mut self, process: usize, request: &Vec<i32>) -> bool {
-        // 验证请求是否合法
+        // 在检查可用资源之前，检查请求是否超过最大声明
         if !self.is_request_valid(process, request) {
-            println!("{} Request exceeds maximum claim", "ERROR:".red());
+            println!("{} 请求超过最大声明", "错误：".red());
             return false;
         }
 
-        // 验证资源是否足够
         if !self.has_sufficient_resources(request) {
-            println!("{} Insufficient resources", "ERROR:".red());
+            println!("{} 资源不足", "错误：".red());
             return false;
         }
 
-        // 尝试分配资源
+        // 尝试分配
         self.try_allocation(process, request);
 
         // 检查安全性
-        let (is_safe, sequence) = self.is_safe();
-        
+        let (is_safe, _) = self.is_safe();
+
         if is_safe {
-            println!("{} Resource allocation successful", "SUCCESS:".green());
-            println!("Safe sequence: {:?}", sequence);
+            println!("{} 资源分配成功", "成功：".green());
             true
         } else {
-            // 回滚分配
+            // 回滚
             self.rollback_allocation(process, request);
-            println!("{} Allocation would lead to unsafe state", "ERROR:".red());
+            println!("{} 分配会导致不安全状态", "错误：".red());
             false
         }
     }
