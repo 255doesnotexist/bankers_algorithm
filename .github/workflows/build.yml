@@ -2,8 +2,8 @@ name: Cross Compile and Release
 
 on:
   push:
-    tags:
-      - 'v*' # 仅在 push tag 时触发
+    branches:
+      - 'master'
 
 jobs:
   build:
