@@ -67,3 +67,30 @@ jobs:
         with:
           name: bankers_algorithm_demo_202211200227-${{ matrix.target }}-${{ steps.date.outputs.date }}
           path: target/${{ matrix.target }}/release/bankers_algorithm-${{ matrix.target }}-${{ steps.date.outputs.date }}${{ runner.os == 'Windows' && '.exe' || '' }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        
+      - name: Get short commit hash
+        id: short-sha
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.short-sha.outputs.sha }}
+          name: Release ${{ steps.short-sha.outputs.sha }}
+          body: |
+            Automated release based on commit ${{ github.sha }}
+          draft: false
+          prerelease: false
+          files: |
+            **/*
