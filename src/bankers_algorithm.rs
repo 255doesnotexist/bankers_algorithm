@@ -140,33 +140,47 @@ impl BankersAlgorithm {
         // Available 向量表格
         let mut available_table = Table::new();
         available_table.set_format(*format::consts::FORMAT_BOX_CHARS);
-
-        // 创建表头
-        let mut header_cells = vec![Cell::new("").style_spec("b")];
+    
+        // Available 表头
+        let mut header_cells = vec![Cell::new("资源号").style_spec("b")];
         for i in 0..self.available.len() {
-            header_cells.push(Cell::new(&format!("Resource {}", i)).style_spec("b"));
+            header_cells.push(Cell::new(&format!("资源 {}", i)).style_spec("b"));
         }
         available_table.add_row(Row::new(header_cells));
-
-        // 创建数据行
-        let mut data_cells = vec![Cell::new("Available 数量")];
+    
+        let mut data_cells = vec![Cell::new("可用资源数")];
         data_cells.extend(self.available.iter().map(|x| Cell::new(&x.to_string())));
         available_table.add_row(Row::new(data_cells));
         available_table.printstd();
-
-        // 矩阵表格
+    
+        // 进程矩阵表格
         let mut table = Table::new();
         table.set_format(*format::consts::FORMAT_BOX_CHARS);
         
-        // 添加表头
-        table.add_row(Row::new(vec![
-            Cell::new("进程号").style_spec("b"),
-            Cell::new("Max 矩阵").style_spec("b"),
-            Cell::new("Allocation 矩阵").style_spec("b"),
-            Cell::new("Need 矩阵").style_spec("b"),
-        ]));
-
-        // 添加数据行
+        // 表头行1: 区分三个矩阵
+        let mut header1 = vec![Cell::new("进程号 / 矩阵").style_spec("b")];
+        header1.extend(vec![
+            Cell::new("Maximum 矩阵").style_spec("bc"),
+            Cell::new("Allocation 矩阵").style_spec("bc"),
+            Cell::new("Need 矩阵").style_spec("bc"),
+        ]);
+        table.add_row(Row::new(header1));
+    
+        // 表头行2: 资源编号
+        let mut header2 = vec![Cell::new("进程号 / 资源号")];
+        let resource_headers = (0..self.available.len())
+            .map(|i| format!(" {:3}", format!("R{}", i)))
+            .collect::<Vec<String>>()
+            .join("");
+        
+        header2.extend(vec![
+            Cell::new(&resource_headers).style_spec("b"),
+            Cell::new(&resource_headers).style_spec("b"),
+            Cell::new(&resource_headers).style_spec("b"),
+        ]);
+        table.add_row(Row::new(header2));
+    
+        // 数据行
         for i in 0..self.max.rows {
             let max_str = self.max.data[i].iter()
                 .map(|x| format!("{:3}", x))
@@ -182,15 +196,15 @@ impl BankersAlgorithm {
                 .map(|x| format!("{:3}", x))
                 .collect::<Vec<String>>()
                 .join(" ");
-
+    
             table.add_row(Row::new(vec![
-                Cell::new(&format!("P{}", i)),
+                Cell::new(&format!("进程 {}", i)),
                 Cell::new(&max_str),
                 Cell::new(&allocation_str),
                 Cell::new(&need_str),
             ]));
         }
-
+    
         table.printstd();
         println!();
     }
