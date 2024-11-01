@@ -26,7 +26,13 @@ impl Matrix {
 impl fmt::Display for Matrix {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for row in &self.data {
-            writeln!(f, "{:?}", row)?;
+            for (i, val) in row.iter().enumerate() {
+                if i > 0 {
+                    write!(f, "\t")?;
+                }
+                write!(f, "{:>4}", val)?;
+            }
+            writeln!(f)?;
         }
         Ok(())
     }

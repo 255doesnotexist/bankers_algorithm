@@ -1,4 +1,5 @@
 use crate::matrix::Matrix;
+use prettytable::{Table, Row, Cell, format};
 use colored::*;
 
 pub struct BankersAlgorithm {
@@ -134,14 +135,54 @@ impl BankersAlgorithm {
     }
 
     pub fn print_state(&self) {
-        println!("\n{}", "当前系统状态:".yellow());
-        println!("Available 向量: {:?}", self.available);
-        println!("\nMaximum 矩阵:");
-        print!("{}", self.max);
-        println!("\nAllocation 矩阵:");
-        print!("{}", self.allocation);
-        println!("\nNeed 矩阵:");
-        print!("{}", self.need);
+        println!("\n{}", "当前系统状态:".yellow().bold());
+        
+        // Available 向量表格
+        let mut available_table = Table::new();
+        available_table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
+        let mut available_cells = vec![Cell::new("Available:")];
+        available_cells.extend(self.available.iter().map(|x| Cell::new(&x.to_string())));
+        available_table.add_row(Row::new(available_cells));
+        available_table.printstd();
+
+        // 矩阵表格
+        let mut table = Table::new();
+        table.set_format(*format::consts::FORMAT_BOX_CHARS);
+        
+        // 添加表头
+        table.add_row(Row::new(vec![
+            Cell::new("Process").style_spec("b"),
+            Cell::new("Maximum").style_spec("b"),
+            Cell::new("Allocation").style_spec("b"),
+            Cell::new("Need").style_spec("b"),
+        ]));
+
+        // 添加数据行
+        for i in 0..self.max.rows {
+            let max_str = self.max.data[i].iter()
+                .map(|x| format!("{:3}", x))
+                .collect::<Vec<String>>()
+                .join(" ");
+            
+            let allocation_str = self.allocation.data[i].iter()
+                .map(|x| format!("{:3}", x))
+                .collect::<Vec<String>>()
+                .join(" ");
+            
+            let need_str = self.need.data[i].iter()
+                .map(|x| format!("{:3}", x))
+                .collect::<Vec<String>>()
+                .join(" ");
+
+            table.add_row(Row::new(vec![
+                Cell::new(&format!("P{}", i)),
+                Cell::new(&max_str),
+                Cell::new(&allocation_str),
+                Cell::new(&need_str),
+            ]));
+        }
+
+        table.printstd();
         println!();
     }
 }
