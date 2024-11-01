@@ -1,0 +1,63 @@
+name: Cross Compile and Release
+
+on:
+  push:
+    tags:
+      - 'v*' # 仅在 push tag 时触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+          - aarch64-unknown-linux-gnu
+          - x86_64-pc-windows-msvc
+          - aarch64-pc-windows-msvc
+          - x86_64-apple-darwin
+          - aarch64-apple-darwin
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+          components: rustfmt, clippy
+
+      - name: Cross compile
+        run: cargo build --release --target=${{ matrix.target }}
+
+      - name: Upload artifacts
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: banks_algo_demo_202211200227-${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/banks_algo_demo_202211200227
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: banks_algo_demo_202211200227-${{ matrix.target }}
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            banks_algo_demo_202211200227-x86_64-unknown-linux-gnu
+            banks_algo_demo_202211200227-aarch64-unknown-linux-gnu
+            banks_algo_demo_202211200227-x86_64-pc-windows-msvc.exe
+            banks_algo_demo_202211200227-aarch64-pc-windows-msvc.exe
+            banks_algo_demo_202211200227-x86_64-apple-darwin
+            banks_algo_demo_202211200227-aarch64-apple-darwin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
