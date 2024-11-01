@@ -167,7 +167,7 @@ impl BankersAlgorithm {
         table.add_row(Row::new(header1));
     
         // 表头行2: 资源编号
-        let mut header2 = vec![Cell::new("进程号 / 资源号")];
+        let mut header2 = vec![Cell::new("进程号 / 资源号").style_spec("b")];
         let resource_headers = (0..self.available.len())
             .map(|i| format!(" {:3}", format!("R{}", i)))
             .collect::<Vec<String>>()
