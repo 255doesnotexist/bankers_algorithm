@@ -139,10 +139,19 @@ impl BankersAlgorithm {
         
         // Available 向量表格
         let mut available_table = Table::new();
-        available_table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
-        let mut available_cells = vec![Cell::new("Available:")];
-        available_cells.extend(self.available.iter().map(|x| Cell::new(&x.to_string())));
-        available_table.add_row(Row::new(available_cells));
+        available_table.set_format(*format::consts::FORMAT_BOX_CHARS);
+
+        // 创建表头
+        let mut header_cells = vec![Cell::new("").style_spec("b")];
+        for i in 0..self.available.len() {
+            header_cells.push(Cell::new(&format!("Resource {}", i)).style_spec("b"));
+        }
+        available_table.add_row(Row::new(header_cells));
+
+        // 创建数据行
+        let mut data_cells = vec![Cell::new("Available 数量")];
+        data_cells.extend(self.available.iter().map(|x| Cell::new(&x.to_string())));
+        available_table.add_row(Row::new(data_cells));
         available_table.printstd();
 
         // 矩阵表格
@@ -151,10 +160,10 @@ impl BankersAlgorithm {
         
         // 添加表头
         table.add_row(Row::new(vec![
-            Cell::new("Process").style_spec("b"),
-            Cell::new("Maximum").style_spec("b"),
-            Cell::new("Allocation").style_spec("b"),
-            Cell::new("Need").style_spec("b"),
+            Cell::new("进程号").style_spec("b"),
+            Cell::new("Max 矩阵").style_spec("b"),
+            Cell::new("Allocation 矩阵").style_spec("b"),
+            Cell::new("Need 矩阵").style_spec("b"),
         ]));
 
         // 添加数据行
