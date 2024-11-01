@@ -39,12 +39,12 @@ jobs:
 
       - name: Get short commit hash (Unix)
         if: runner.os != 'Windows'
-        id: short-sha
+        id: short-sha-unix
         run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Get short commit hash (Windows)
         if: runner.os == 'Windows'
-        id: short-sha
+        id: short-sha-windows
         run: echo sha=$(git rev-parse --short HEAD) >> $env:GITHUB_OUTPUT
 
       - name: Build
@@ -53,12 +53,12 @@ jobs:
       - name: Rename output binary (Unix)
         if: runner.os != 'Windows'
         run: |
-          mv target/${{ matrix.target }}/release/bankers_algorithm target/${{ matrix.target }}/release/bankers_algorithm_demo_202211200227-${{ matrix.target }}-${{ steps.short-sha.outputs.sha }}
+          mv target/${{ matrix.target }}/release/bankers_algorithm target/${{ matrix.target }}/release/bankers_algorithm_demo_202211200227-${{ matrix.target }}-${{ steps.short-sha-unix.outputs.sha }}
 
       - name: Rename output binary (Windows)
         if: runner.os == 'Windows'
         run: |
-          ren target\${{ matrix.target }}\release\bankers_algorithm.exe bankers_algorithm_demo_202211200227-${{ matrix.target }}-${{ steps.short-sha.outputs.sha }}.exe
+          ren target\${{ matrix.target }}\release\bankers_algorithm.exe bankers_algorithm_demo_202211200227-${{ matrix.target }}-${{ steps.short-sha-windows.outputs.sha }}.exe
 
       - name: List build outputs (Unix)
         if: runner.os != 'Windows'
@@ -71,8 +71,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: bankers_algorithm_demo_202211200227-${{ matrix.target }}-${{ steps.short-sha.outputs.sha }}
-          path: target/${{ matrix.target }}/release/bankers_algorithm_demo_202211200227-${{ matrix.target }}-${{ steps.short-sha.outputs.sha }}${{ runner.os == 'Windows' && '.exe' || '' }}
+          name: bankers_algorithm_demo_202211200227-${{ matrix.target }}-${{ runner.os != 'Windows' && steps.short-sha-unix.outputs.sha || steps.short-sha-windows.outputs.sha }}
+          path: target/${{ matrix.target }}/release/bankers_algorithm_demo_202211200227-${{ matrix.target }}-${{ runner.os != 'Windows' && steps.short-sha-unix.outputs.sha || steps.short-sha-windows.outputs.sha }}${{ runner.os == 'Windows' && '.exe' || '' }}
 
   release:
     needs: build
@@ -84,7 +84,7 @@ jobs:
         uses: actions/download-artifact@v3
         
       - name: Get short commit hash
-        id: short-sha
+        id: short-sha-release
         run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Create Release
@@ -92,8 +92,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ steps.short-sha.outputs.sha }}
-          name: Release ${{ steps.short-sha.outputs.sha }}
+          tag_name: v${{ steps.short-sha-release.outputs.sha }}
+          name: Release ${{ steps.short-sha-release.outputs.sha }}
           body: |
             Automated release based on commit ${{ github.sha }}
           draft: false
