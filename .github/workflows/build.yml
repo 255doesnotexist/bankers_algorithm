@@ -1,63 +1,64 @@
 name: Cross Compile and Release
-
 on:
   push:
     branches:
-      - 'master'
+      - master
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        target:
-          - x86_64-unknown-linux-gnu
-          - aarch64-unknown-linux-gnu
-          - x86_64-pc-windows-msvc
-          - aarch64-pc-windows-msvc
-          - x86_64-apple-darwin
-          - aarch64-apple-darwin
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: x86_64-apple-darwin
+            os: macos-latest
+          - target: aarch64-apple-darwin
+            os: macos-latest
+          - target: x86_64-pc-windows-gnu
+            os: windows-latest
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+          - target: aarch64-pc-windows-msvc
+            os: windows-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Install Rust toolchain
+      - name: Set up Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           target: ${{ matrix.target }}
-          components: rustfmt, clippy
+          override: true
 
-      - name: Cross compile
-        run: cargo build --release --target=${{ matrix.target }}
+      - name: Install target
+        run: rustup target add ${{ matrix.target }}
 
-      - name: Upload artifacts
-        if: success()
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Rename output binary (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          mv target/${{ matrix.target }}/release/bankers_algorithm target/${{ matrix.target }}/release/bankers_algorithm-${{ matrix.target }}-${{ steps.date.outputs.date }}
+
+      - name: Rename output binary (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          ren target\${{ matrix.target }}\release\bankers_algorithm.exe bankers_algorithm-${{ matrix.target }}-${{ steps.date.outputs.date }}.exe
+
+      - name: List build outputs
+        run: ls target/${{ matrix.target }}/release/
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: banks_algo_demo_202211200227-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/banks_algo_demo_202211200227
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: banks_algo_demo_202211200227-${{ matrix.target }}
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            banks_algo_demo_202211200227-x86_64-unknown-linux-gnu
-            banks_algo_demo_202211200227-aarch64-unknown-linux-gnu
-            banks_algo_demo_202211200227-x86_64-pc-windows-msvc.exe
-            banks_algo_demo_202211200227-aarch64-pc-windows-msvc.exe
-            banks_algo_demo_202211200227-x86_64-apple-darwin
-            banks_algo_demo_202211200227-aarch64-apple-darwin
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: bankers_algorithm_demo_202211200227-${{ matrix.target }}-${{ steps.date.outputs.date }}
+          path: target/${{ matrix.target }}/release/bankers_algorithm-${{ matrix.target }}-${{ steps.date.outputs.date }}
