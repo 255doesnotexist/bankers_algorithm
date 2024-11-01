@@ -1,3 +1,6 @@
+use std::fs::File;
+use std::io::{self, BufRead};
+use std::path::Path;
 use colored::*;
 
 mod matrix;
@@ -9,22 +12,9 @@ mod bankers_algorithm;
 use bankers_algorithm::BankersAlgorithm;
 
 fn main() {
-    // 示例用例1
-    let available = vec![3, 3, 2];
-    let max = Matrix::from_vec(vec![
-        vec![7, 5, 3],
-        vec![3, 2, 2],
-        vec![9, 0, 2],
-        vec![2, 2, 2],
-        vec![4, 3, 3],
-    ]);
-    let allocation = Matrix::from_vec(vec![
-        vec![0, 1, 0],
-        vec![2, 0, 0],
-        vec![3, 0, 2],
-        vec![2, 1, 1],
-        vec![0, 0, 2],
-    ]);
+    let available = read_vector("available.txt").expect("Failed to read available vector");
+    let max = read_matrix("max.txt").expect("Failed to read max matrix");
+    let allocation = read_matrix("allocation.txt").expect("Failed to read allocation matrix");
 
     let mut banker = BankersAlgorithm::new(available, max, allocation);
     
@@ -39,7 +29,6 @@ fn main() {
     } else {
         println!("{} 系统处于不安全状态", "ERROR:".red());
     }
-
     // 处理资源请求
     let process = 1;
     let request = vec![1, 0, 2];
@@ -47,4 +36,33 @@ fn main() {
     banker.request_resources(process, &request);
     
     banker.print_state();
+}
+
+fn read_vector(filename: &str) -> io::Result<Vec<i32>> {
+    let path = Path::new(filename);
+    let file = File::open(&path)?;
+    let reader = io::BufReader::new(file);
+
+    let line = reader.lines().next().unwrap()?;
+    let vector: Vec<i32> = line.split_whitespace()
+        .map(|s| s.parse().unwrap())
+        .collect();
+
+    Ok(vector)
+}
+
+fn read_matrix(filename: &str) -> io::Result<Matrix> {
+    let path = Path::new(filename);
+    let file = File::open(&path)?;
+    let reader = io::BufReader::new(file);
+
+    let mut data = Vec::new();
+    for line in reader.lines() {
+        let row: Vec<i32> = line?.split_whitespace()
+            .map(|s| s.parse().unwrap())
+            .collect();
+        data.push(row);
+    }
+
+    Ok(Matrix::from_vec(data))
 }
