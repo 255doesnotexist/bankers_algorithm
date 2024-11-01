@@ -37,9 +37,15 @@ jobs:
       - name: Install target
         run: rustup target add ${{ matrix.target }}
 
-      - name: Get short commit hash
+      - name: Get short commit hash (Unix)
+        if: runner.os != 'Windows'
         id: short-sha
         run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Get short commit hash (Windows)
+        if: runner.os == 'Windows'
+        id: short-sha
+        run: echo sha=$(git rev-parse --short HEAD) >> $GITHUB_OUTPUT
 
       - name: Build
         run: cargo build --release --target ${{ matrix.target }}
