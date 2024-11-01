@@ -37,9 +37,9 @@ jobs:
       - name: Install target
         run: rustup target add ${{ matrix.target }}
 
-      - name: Get current date
-        id: date
-        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+      - name: Get short commit hash
+        id: short-sha
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Build
         run: cargo build --release --target ${{ matrix.target }}
@@ -47,12 +47,12 @@ jobs:
       - name: Rename output binary (Unix)
         if: runner.os != 'Windows'
         run: |
-          mv target/${{ matrix.target }}/release/bankers_algorithm target/${{ matrix.target }}/release/bankers_algorithm-${{ matrix.target }}-${{ steps.date.outputs.date }}
+          mv target/${{ matrix.target }}/release/bankers_algorithm target/${{ matrix.target }}/release/bankers_algorithm-${{ matrix.target }}-${{ steps.short-sha.outputs.sha }}
 
       - name: Rename output binary (Windows)
         if: runner.os == 'Windows'
         run: |
-          ren target\${{ matrix.target }}\release\bankers_algorithm.exe bankers_algorithm-${{ matrix.target }}-${{ steps.date.outputs.date }}.exe
+          ren target\${{ matrix.target }}\release\bankers_algorithm.exe bankers_algorithm-${{ matrix.target }}-${{ steps.short-sha.outputs.sha }}.exe
 
       - name: List build outputs (Unix)
         if: runner.os != 'Windows'
@@ -65,8 +65,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: bankers_algorithm_demo_202211200227-${{ matrix.target }}-${{ steps.date.outputs.date }}
-          path: target/${{ matrix.target }}/release/bankers_algorithm-${{ matrix.target }}-${{ steps.date.outputs.date }}${{ runner.os == 'Windows' && '.exe' || '' }}
+          name: bankers_algorithm_demo_202211200227-${{ matrix.target }}-${{ steps.short-sha.outputs.sha }}
+          path: target/${{ matrix.target }}/release/bankers_algorithm-${{ matrix.target }}-${{ steps.short-sha.outputs.sha }}${{ runner.os == 'Windows' && '.exe' || '' }}
 
   release:
     needs: build
