@@ -18,6 +18,9 @@ mod tests {
         ]);
 
         let banker = BankersAlgorithm::new(available.clone(), max.clone(), allocation.clone());
+        
+        banker.print_state();
+        
         let (is_safe, safe_sequence) = banker.is_safe();
         assert!(is_safe);
         assert_eq!(safe_sequence, vec![1, 0, 2]); // 确保有一个安全序列
@@ -36,6 +39,9 @@ mod tests {
         ]);
 
         let banker = BankersAlgorithm::new(available.clone(), max.clone(), allocation.clone());
+        
+        banker.print_state();
+        
         let (is_safe, _) = banker.is_safe();
         assert!(!is_safe);
     }
@@ -53,9 +59,13 @@ mod tests {
         ]);
 
         let mut banker = BankersAlgorithm::new(available.clone(), max.clone(), allocation.clone());
+        
+        banker.print_state();
+        
         let request = vec![1, 0, 1];
         assert!(banker.request_resources(0, &request)); // 确保请求成功
 
+        banker.print_state();
         // 重新检查安全性
         let (is_safe, _) = banker.is_safe();
         assert!(is_safe); // 确保仍然是安全状态
@@ -74,6 +84,8 @@ mod tests {
         ]);
 
         let mut banker = BankersAlgorithm::new(available.clone(), max.clone(), allocation.clone());
+        
+        banker.print_state();
         let request = vec![8, 0, 0]; // 超过最大需求
         assert!(!banker.request_resources(0, &request)); // 确保请求失败
     }
