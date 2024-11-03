@@ -26,10 +26,51 @@ pub struct BankersAlgorithm {
 }
 ```
 
+让我为这些核心算法提供更详细的文字描述：
+
 #### 2.2 核心算法实现
-1. **初始化**：通过构造函数创建新的银行家算法实例，自动计算初始Need矩阵
-2. **安全性检查**：实现`is_safe()`函数，使用工作向量和完成向量判断系统状态
-3. **资源请求处理**：实现`request_resources()`函数，包含检查和回滚机制
+
+1. **初始化算法**
+   - 输入参数：available向量（可用资源）、max矩阵（最大需求）、allocation矩阵（已分配资源）
+   - 处理流程：
+     1. 获取进程数量（max矩阵的行数）和资源类型数量（max矩阵的列数）
+     2. 创建need矩阵，大小与max矩阵相同
+     3. 对每个进程i和资源j，计算need[i][j] = max[i][j] - allocation[i][j]
+   - 输出结果：包含完整系统状态的BankersAlgorithm实例
+
+2. **安全性检查算法**
+   - 输入状态：系统当前的available、allocation和need矩阵
+   - 处理流程：
+     1. 初始化work = available（工作向量）
+     2. 初始化finish[n] = false（完成向量）
+     3. 循环查找满足以下条件的进程P[i]：
+        - finish[i] = false
+        - need[i] ≤ work
+     4. 如果找到这样的进程：
+        - work = work + allocation[i]
+        - finish[i] = true
+        - 将i添加到安全序列
+        - 继续寻找下一个进程
+     5. 如果找不到这样的进程，检查是否所有finish[i] = true
+   - 输出结果：(是否安全, 安全序列)
+
+3. **资源请求处理算法**
+   - 输入参数：进程ID、请求向量request
+   - 验证步骤：
+     1. 检查request ≤ need[i]（请求是否超过声明的最大需求）
+     2. 检查request ≤ available（是否有足够的可用资源）
+   - 试探分配：
+     1. available = available - request
+     2. allocation[i] = allocation[i] + request
+     3. need[i] = need[i] - request
+   - 安全性检查：
+     1. 调用is_safe()检查分配后的状态
+     2. 如果安全，保持分配
+     3. 如果不安全，执行回滚：
+        - available = available + request
+        - allocation[i] = allocation[i] - request
+        - need[i] = need[i] + request
+   - 输出结果：分配是否成功的布尔值
 
 #### 2.3 错误处理与状态管理
 - 使用 Rust 的 Result 类型处理文件读取错误
