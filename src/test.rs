@@ -2,9 +2,7 @@
 mod tests {
     use crate::matrix::Matrix;
     use crate::bankers_algorithm::BankersAlgorithm;
-    
-    #[cfg_attr(test, test)]
-    #[serial_test::serial]
+
     #[test]
     fn test_basic_safe_state() {
         let available: Vec<i32> = vec![3, 3, 2];
